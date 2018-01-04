@@ -61,6 +61,7 @@ add_library(flatland_plugins_lib SHARED
   src/laser.cpp
   src/tricycle_drive.cpp
   src/diff_drive.cpp
+  src/imu.cpp
   src/model_tf_publisher.cpp
   src/update_timer.cpp
   src/bumper.cpp
@@ -136,6 +137,9 @@ if(BUILD_TESTING)
 
   ament_add_gtest(tricycle_drive_test test/tricycle_drive_test.cpp)
   target_link_libraries(tricycle_drive_test flatland_plugins_lib)
+
+  ament_add_gtest(imu_test test/imu_test.cpp)
+  target_link_libraries(imu_test flatland_plugins_lib)
 
   ament_add_gtest(model_tf_publisher_test test/model_tf_publisher_test.cpp)
   target_link_libraries(model_tf_publisher_test flatland_plugins_lib)
