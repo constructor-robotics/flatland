@@ -51,6 +51,7 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/convert.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <geometry_msgs/msg/TwistWithCovarianceStamped.hpp>
 
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <pluginlib/class_list_macros.hpp>
@@ -128,7 +129,7 @@ void DiffDrive::OnInitialize(const YAML::Node & config)
   }
 
   if (enable_twist_pub_) {
-    twist_pub_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>(twist_pub_topic, 1);
+    twist_pub_ = node_->create_publisher<geometry_msgs::msg::TwistWithCovarianceStamped>(twist_pub_topic, 1);
   }
 
   // init the values for the messages
@@ -221,12 +222,16 @@ void DiffDrive::BeforePhysicsStep(const Timekeeper & timekeeper)
       twist_pub_msg.header.frame_id = odom_msg_.child_frame_id;
 
       // Forward velocity in twist.linear.x
-      twist_pub_msg.twist.linear.x =
-        cos(angle) * linear_vel_local.x + sin(angle) * linear_vel_local.y + noise_gen_[3](rng_);
+      twist_pub_msg.twist.twist.linear.x = cos(angle) * linear_vel_local.x +
+                                           sin(angle) * linear_vel_local.y +
+                                           noise_gen_[3](rng_);
 
       // Angular velocity in twist.angular.z
-      twist_pub_msg.twist.angular.z = angular_vel + noise_gen_[5](rng_);
-      twist_pub_->publish(twist_pub_msg);
+      twist_pub_msg.twist.twist.angular.z = angular_vel + noise_gen_[5](rng_);
+
+      twist_pub_msg.twist.covariance = odom_msg_.twist.covariance;
+
+      twist_pub_.publish(twist_pub_msg);
     }
 
     // publish odom tf
