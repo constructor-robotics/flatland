@@ -69,6 +69,8 @@ void DiffDrive::OnInitialize(const YAML::Node & config)
   YamlReader reader(node_, config);
   enable_odom_pub_ = reader.Get<bool>("enable_odom_pub", true);
   enable_twist_pub_ = reader.Get<bool>("enable_twist_pub", true);
+  twist_in_local_frame_ = reader.Get<bool>("twist_in_local_frame", true);
+
   std::string body_name = reader.Get<std::string>("body");
   std::string odom_frame_id = reader.Get<std::string>("odom_frame_id", "odom");
 
@@ -195,7 +197,18 @@ void DiffDrive::BeforePhysicsStep(const Timekeeper & timekeeper)
     ground_truth_msg_.twist.twist.linear.z = 0;
     ground_truth_msg_.twist.twist.angular.x = 0;
     ground_truth_msg_.twist.twist.angular.y = 0;
-    ground_truth_msg_.twist.twist.angular.z = angular_vel;
+    if (twist_in_local_frame_ == true) {
+      // change frame of velocity
+      ground_truth_msg_.twist.twist.linear.x =
+          cos(-angle) * linear_vel_local.x - sin(-angle) * linear_vel_local.y;
+      ground_truth_msg_.twist.twist.linear.y =
+          sin(-angle) * linear_vel_local.x + cos(-angle) * linear_vel_local.y;
+      ground_truth_msg_.twist.twist.angular.z = angular_vel;
+    } else {
+      ground_truth_msg_.twist.twist.linear.x = linear_vel_local.x;
+      ground_truth_msg_.twist.twist.linear.y = linear_vel_local.y;
+      ground_truth_msg_.twist.twist.angular.z = angular_vel;
+    }
 
     // add the noise to odom messages
     odom_msg_.header.stamp = timekeeper.GetSimTime();
