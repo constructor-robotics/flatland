@@ -62,6 +62,7 @@ add_library(flatland_plugins_lib SHARED
   src/tricycle_drive.cpp
   src/diff_drive.cpp
   src/imu.cpp
+  src/dynamics_limits.cpp
   src/model_tf_publisher.cpp
   src/update_timer.cpp
   src/bumper.cpp
@@ -134,6 +135,9 @@ if(BUILD_TESTING)
 
   ament_add_gtest(diff_drive_test test/diff_drive_test.cpp)
   target_link_libraries(diff_drive_test flatland_plugins_lib)
+
+  ament_add_gtest(dynamics_limits_test test/dynamics_limits_test.cpp)
+  target_link_libraries(dynamics_limits_test flatland_plugins_lib)
 
   ament_add_gtest(tricycle_drive_test test/tricycle_drive_test.cpp)
   target_link_libraries(tricycle_drive_test flatland_plugins_lib)
