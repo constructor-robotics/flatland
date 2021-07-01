@@ -379,7 +379,7 @@ void TricycleDrive::BeforePhysicsStep(const Timekeeper & timekeeper)
   // (1) Update the new steering angle
   delta_ += d_delta_ * dt;
   if (max_steer_angle_ != 0.0) {
-    delta_ = Saturate(delta_, -max_steer_angle_, max_steer_angle_);
+    theta_f_ = DynamicsLimits::Saturate(theta_f_, -max_steer_angle_, max_steer_angle_);
   }
 
   ROS_DEBUG_THROTTLE(0.5,
@@ -434,16 +434,6 @@ void TricycleDrive::TwistCallback(const geometry_msgs::msg::TwistStamped::Shared
   twist_msg_ = msg;
 }
 
-double TricycleDrive::Saturate(double in, double lower, double upper)
-{
-  if (lower > upper) {
-    return in;
-  }
-  double out = in;
-  out = std::max(out, lower);
-  out = std::min(out, upper);
-  return out;
 }
-}  // namespace flatland_plugins
 
 PLUGINLIB_EXPORT_CLASS(flatland_plugins::TricycleDrive, flatland_server::ModelPlugin)
