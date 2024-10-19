@@ -51,7 +51,7 @@
 #include <OgreEntity.h>
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
-#include <OgreVector3.h>
+#include <Ogre.h>
 
 #include <QCursor>
 #include <QDialog>

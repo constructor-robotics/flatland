@@ -52,7 +52,7 @@
 #include <OGRE/OgreEntity.h>
 #include <OGRE/OgreSceneManager.h>
 #include <OGRE/OgreSceneNode.h>
-#include <OGRE/OgreVector3.h>
+#include <OGRE/Ogre.h>
 
 #include <QCursor>
 #include <QDialog>
@@ -65,7 +65,7 @@
 #include <QString>
 #include <QVBoxLayout>
 #include <QWidget>
-//#include <OgreVector3.h>
+//#include <Ogre.h>
 
 #include <boost/filesystem.hpp>
 #include <rclcpp/rclcpp.hpp>

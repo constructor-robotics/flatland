@@ -45,6 +45,8 @@
  */
 
 #include <Box2D/Box2D.h>
+#include <array>
+
 //#include <geometry_msgs/msg/pose2_d.hpp>
 
 #ifndef FLATLAND_SERVER_TYPES_H

@@ -50,8 +50,8 @@
 #include <OGRE/OgreEntity.h>
 #include <OGRE/OgreSceneManager.h>
 #include <OGRE/OgreSceneNode.h>
-#include <OGRE/OgreVector3.h>
-//#include <OgreVector3.h>
+#include <OGRE/Ogre.h>
+//#include <Ogre.h>
 
 #include <rviz_common/visualization_manager.h>
 
@@ -171,7 +171,7 @@ void LoadModelDialog::OkButtonClicked()
 
 void LoadModelDialog::AddNumberAndUpdateName()
 {
-  std::string bsfn = boost::filesystem::basename(path_to_model_file.toStdString());
+  std::string bsfn = boost::filesystem::path(path_to_model_file.toStdString()).stem().string();
   QString name = QString::fromStdString(bsfn);
 
   if (numbering) {

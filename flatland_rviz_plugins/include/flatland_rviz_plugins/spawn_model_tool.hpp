@@ -54,7 +54,7 @@
 #include <OgreEntity.h>
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
-#include <OgreVector3.h>
+#include <Ogre.h>
 
 #include <flatland_msgs/srv/spawn_model.hpp>
 #include <rclcpp/rclcpp.hpp>

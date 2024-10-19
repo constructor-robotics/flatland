@@ -49,7 +49,7 @@
 
 #include <string>
 
-#include <OgreVector3.h>
+#include <Ogre.h>
 
 #include <QCheckBox>
 #include <QCursor>
@@ -173,7 +173,7 @@ void LoadModelDialog::OkButtonClicked()
 
 void LoadModelDialog::AddNumberAndUpdateName()
 {
-  std::string bsfn = boost::filesystem::basename(path_to_model_file.toStdString());
+  std::string bsfn = boost::filesystem::path(path_to_model_file.toStdString()).stem().string();
   QString name = QString::fromStdString(bsfn);
 
   if (numbering) {

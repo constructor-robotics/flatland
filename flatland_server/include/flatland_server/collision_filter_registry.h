@@ -50,6 +50,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <cstdint>
 
 namespace flatland_server
 {

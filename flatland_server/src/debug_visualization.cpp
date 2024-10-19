@@ -50,7 +50,7 @@
 #include <rmw/qos_profiles.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/convert.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 #include <map>
 #include <rclcpp/rclcpp.hpp>
@@ -237,7 +237,12 @@ void DebugVisualization::Publish(const Timekeeper & timekeeper)
 
   for (auto & topic : topics_) {
     if (!topic.second.needs_publishing) {
-      continue;
+      if (topic.second.markers.markers.size() == 0) continue;
+      // publish if there's content, but only every 2s
+      auto delta = timekeeper.GetSimTime().seconds() - rclcpp::Time(topic.second.markers.markers[0].header.stamp).seconds();
+      if (delta < 2.0) {
+        continue;
+      }
     }
 
     // since if empty markers are published rviz will continue to publish

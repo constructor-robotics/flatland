@@ -51,13 +51,13 @@
 #include <OGRE/OgreEntity.h>
 #include <OGRE/OgreSceneManager.h>
 #include <OGRE/OgreSceneNode.h>
-#include <OGRE/OgreVector3.h>
+#include <OGRE/Ogre.h>
 
 #include <memory>
 #include <rclcpp/rclcpp.hpp>
 #include <rviz_common/tool.hpp>
 #include <vector>
-//#include <OgreVector3.h>
+//#include <Ogre.h>
 
 #include <flatland_server/yaml_reader.h>
 
