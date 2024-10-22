@@ -136,7 +136,7 @@ void TricycleDrive::OnInitialize(const YAML::Node & config)
 
   // publish and subscribe to topics
   using std::placeholders::_1;
-  twist_sub_ = node_->create_subscription<geometry_msgs::msg::Twist>(
+  twist_sub_ = node_->create_subscription<geometry_msgs::msg::TwistStamped>(
     twist_topic, 1, std::bind(&TricycleDrive::TwistCallback, this, _1));
   odom_pub_ = node_->create_publisher<nav_msgs::msg::Odometry>(odom_topic, 1);
   ground_truth_pub_ = node_->create_publisher<nav_msgs::msg::Odometry>(ground_truth_topic, 1);
@@ -344,8 +344,8 @@ void TricycleDrive::BeforePhysicsStep(const Timekeeper & timekeeper)
   //   |d2δ[t]| <= max_steer_acceleration_
 
   // twist message contains the speed and angle of the front wheel
-  double v_f = twist_msg_->linear.x;       // target velocity at front wheel
-  delta_command_ = twist_msg_->angular.z;  // target steering angle
+  double v_f = twist_msg_->twist.linear.x;       // target velocity at front wheel
+  delta_command_ = twist_msg_->twist.angular.z;  // target steering angle
   double theta = angle;                    // angle of robot in map frame
   double dt = timekeeper.GetStepSize();
 
@@ -386,7 +386,7 @@ void TricycleDrive::BeforePhysicsStep(const Timekeeper & timekeeper)
     rclcpp::get_logger("TricycleDrive"), steady_clock, 500,
     "Using new tricycle steering, d2_delta = %.4f, "
     "d_delta = %.4f, twist.x = %.4f, twist.delta = %.4f",
-    d2_delta, d_delta_, twist_msg_->linear.x, twist_msg_->angular.z);
+    d2_delta, d_delta_, twist_msg_->twist.linear.x, twist_msg_->twist.angular.z);
 
   // change angle of the front wheel for visualization
 
@@ -425,7 +425,7 @@ void TricycleDrive::BeforePhysicsStep(const Timekeeper & timekeeper)
   b2body->SetAngularVelocity(w);
 }
 
-void TricycleDrive::TwistCallback(const geometry_msgs::msg::Twist::SharedPtr msg)
+void TricycleDrive::TwistCallback(const geometry_msgs::msg::TwistStamped::SharedPtr msg)
 {
   twist_msg_ = msg;
 }

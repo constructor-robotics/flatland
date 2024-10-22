@@ -59,7 +59,7 @@
 namespace flatland_plugins
 {
 
-void DiffDrive::TwistCallback(const geometry_msgs::msg::Twist::SharedPtr msg) { twist_msg_ = msg; }
+void DiffDrive::TwistCallback(const geometry_msgs::msg::TwistStamped::SharedPtr msg) { twist_msg_ = msg; }
 
 void DiffDrive::OnInitialize(const YAML::Node & config)
 {
@@ -120,7 +120,7 @@ void DiffDrive::OnInitialize(const YAML::Node & config)
 
   // publish and subscribe to topics
   using std::placeholders::_1;
-  twist_sub_ = node_->create_subscription<geometry_msgs::msg::Twist>(
+  twist_sub_ = node_->create_subscription<geometry_msgs::msg::TwistStamped>(
     twist_topic, 1, std::bind(&DiffDrive::TwistCallback, this, _1));
   if (enable_odom_pub_) {
     odom_pub_ = node_->create_publisher<nav_msgs::msg::Odometry>(odom_topic, 1);
@@ -243,9 +243,9 @@ void DiffDrive::BeforePhysicsStep(const Timekeeper & timekeeper)
   // we apply the twist velocities, this must be done every physics step to make
   // sure Box2D solver applies the correct velocity through out. The velocity
   // given in the twist message should be in the local frame
-  b2Vec2 linear_vel_local(twist_msg_->linear.x, 0);
+  b2Vec2 linear_vel_local(twist_msg_->twist.linear.x, 0);
   b2Vec2 linear_vel = b2body->GetWorldVector(linear_vel_local);
-  float angular_vel = twist_msg_->angular.z;  // angular is independent of frames
+  float angular_vel = twist_msg_->twist.angular.z;  // angular is independent of frames
 
   // we want the velocity vector in the world frame at the center of mass
 

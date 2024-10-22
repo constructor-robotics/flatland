@@ -50,7 +50,6 @@
 #include <flatland_server/timekeeper.h>
 #include <tf2_ros/transform_broadcaster.h>
 
-#include <geometry_msgs/msg/twist.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <random>
@@ -66,12 +65,12 @@ namespace flatland_plugins
 class DiffDrive : public flatland_server::ModelPlugin
 {
 public:
-  rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr twist_sub_;
+  rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::SharedPtr twist_sub_;
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr ground_truth_pub_;
   rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr twist_pub_;
   Body * body_;
-  geometry_msgs::msg::Twist::SharedPtr twist_msg_ = std::make_shared<geometry_msgs::msg::Twist>();
+  geometry_msgs::msg::TwistStamped::SharedPtr twist_msg_ = std::make_shared<geometry_msgs::msg::TwistStamped>();
   nav_msgs::msg::Odometry odom_msg_;
   nav_msgs::msg::Odometry ground_truth_msg_;
   UpdateTimer update_timer_;
@@ -99,7 +98,7 @@ public:
    * @brief       callback to apply twist (velocity and omega)
    * @param[in]   timestep how much the physics time will increment
    */
-  void TwistCallback(const geometry_msgs::msg::Twist::SharedPtr msg);
+  void TwistCallback(const geometry_msgs::msg::TwistStamped::SharedPtr msg);
 };
 }  // namespace flatland_plugins
 
