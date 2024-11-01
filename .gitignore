@@ -10,3 +10,6 @@ docs/_templates/*
 */.history
 **/.idea/
 **/cmake-build-debug/
+build
+install
+log

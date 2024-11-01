@@ -114,6 +114,9 @@ void Bumper::BeforePhysicsStep(const Timekeeper & timekeeper)
   for (it = contact_states_.begin(); it != contact_states_.end(); it++) {
     it->second.Reset();
   }
+
+  // Avoid -Wunused-parameter warnings - remove if parameter is used!
+  (void)timekeeper;
 }
 
 void Bumper::AfterPhysicsStep(const Timekeeper & timekeeper)

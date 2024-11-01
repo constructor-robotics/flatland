@@ -218,6 +218,10 @@ float LaserCallback::ReportFixture(
   did_hit_ = true;
   fraction_ = fraction;
 
+  // Avoid -Wunused-parameter warnings - remove if parameter is used!
+  (void)point;
+  (void)normal;
+
   return fraction;
 }
 

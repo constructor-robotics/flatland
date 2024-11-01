@@ -105,6 +105,9 @@ Layer::Layer(
   const std::vector<std::string> & names, const Color & color, const YAML::Node & properties)
 : Entity(node, physics_world, names[0]), names_(names), cfr_(cfr), viz_name_("layers/l_" + names[0])
 {
+  // Avoid -Wunused-parameter warnings - remove if parameter is used!
+  (void)color;
+  (void)properties;
 }
 
 Layer::~Layer() { delete body_; }

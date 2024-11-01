@@ -73,6 +73,10 @@ void DummyWorldPlugin::OnInitialize(const YAML::Node & plugin_reader, YamlReader
       "\"DummyWorldPluginType\", the type is " +
       type_);
   }
+
+  // Avoid -Wunused-parameter warnings - remove if parameter is used!
+  (void)plugin_reader;
+  (void)world_config;
 }
 }  // namespace flatland_plugins
 
