@@ -327,7 +327,7 @@ void Layer::DebugOutput() const
     rclcpp::get_logger("Layer"),
     "Layer %p: physics_world(%p) name(%s) names(%s) "
     "category_bits(0x%X)",
-    this, physics_world_, name_.c_str(), names.c_str(), category_bits);
+    (void*)this, (void*)physics_world_, name_.c_str(), names.c_str(), category_bits);
 
   if (body_ != nullptr) {
     body_->DebugOutput();
