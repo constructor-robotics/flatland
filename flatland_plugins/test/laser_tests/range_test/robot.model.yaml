@@ -20,7 +20,7 @@ plugins:
 
   - type: Laser
     name: laser_center
-    topic: /scan_center
+    topic: scan_center
     frame: center_laser
     body: base_link
     origin: [0, 0, 0]
