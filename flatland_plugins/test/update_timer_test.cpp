@@ -67,6 +67,9 @@ public:
   {
     update_timer_.SetRate(0);
     update_counter_ = 0;
+
+    // Avoid -Wunused-parameter warnings - remove if parameter is used!
+    (void)config;
   }
 
   void BeforePhysicsStep(const Timekeeper & timekeeper) override

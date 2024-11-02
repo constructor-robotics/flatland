@@ -64,6 +64,7 @@ public:
   boost::filesystem::path this_file_dir;
   boost::filesystem::path world_yaml;
   sensor_msgs::msg::LaserScan scan_front, scan_center, scan_back;
+  bool scan_front_received, scan_center_received, scan_back_received;
   World * w;
   std::shared_ptr<rclcpp::Node> node;
 
@@ -73,6 +74,9 @@ public:
   {
     this_file_dir = boost::filesystem::path(__FILE__).parent_path();
     w = nullptr;
+    scan_front_received = false;
+    scan_center_received = false;
+    scan_back_received = false;
   }
 
   void TearDown() override { delete w; }
@@ -117,18 +121,47 @@ public:
     float angle_max, float angle_increment, float time_increment, float scan_time, float range_min,
     float range_max, std::vector<float> ranges, std::vector<float> intensities)
   {
+    bool return_value = true;
     if (scan.header.frame_id != frame_id) {
       printf("frame_id Actual:%s != Expected:%s\n", scan.header.frame_id.c_str(), frame_id.c_str());
-      return false;
+      return_value = false;
     }
 
-    if (!FloatEq("angle_min", scan.angle_min, angle_min)) return false;
-    if (!FloatEq("angle_max", scan.angle_max, angle_max)) return false;
-    if (!FloatEq("angle_increment", scan.angle_increment, angle_increment)) return false;
-    if (!FloatEq("time_increment", scan.time_increment, time_increment)) return false;
-    if (!FloatEq("scan_time", scan.scan_time, scan_time)) return false;
-    if (!FloatEq("range_min", scan.range_min, range_min)) return false;
-    if (!FloatEq("range_max", scan.range_max, range_max)) return false;
+    if (!FloatEq("angle_min", scan.angle_min, angle_min)) {
+      printf("angle_min Actual: %f != Expected: %f\n", scan.angle_min, angle_min);
+      return_value = false;
+    }
+
+    if (!FloatEq("angle_max", scan.angle_max, angle_max)) {
+      printf("angle_max Actual: %f != Expected: %f\n", scan.angle_max, angle_max);
+      return_value = false;
+    }
+
+    if (!FloatEq("angle_increment", scan.angle_increment, angle_increment)) {
+      printf("angle_increment Actual: %f != Expected: %f\n", scan.angle_increment, angle_increment);
+      return_value = false;
+    }
+
+    if (!FloatEq("time_increment", scan.time_increment, time_increment)) {
+      printf("time_increment Actual: %f != Expected: %f\n", scan.time_increment, time_increment);
+      return_value = false;
+    }
+
+    if (!FloatEq("scan_time", scan.scan_time, scan_time)) {
+      printf("scan_time Actual: %f != Expected: %f\n", scan.scan_time, scan_time);
+      return_value = false;
+    }
+
+    if (!FloatEq("range_min", scan.range_min, range_min)) {
+      printf("range_min Actual: %f != Expected: %f\n", scan.range_min, range_min);
+      return_value = false;
+    }
+
+    if (!FloatEq("range_max", scan.range_max, range_max)) {
+      printf("range_max Actual: %f != Expected: %f\n", scan.range_max, range_max);
+      return_value = false;
+    }
+
 
     if (
       ranges.size() != scan.ranges.size() ||
@@ -140,7 +173,7 @@ public:
       printf("Expected: ");
       print_flt_vec(ranges);
       printf("\n");
-      return false;
+      return_value = false;
     }
 
     if (
@@ -153,15 +186,27 @@ public:
       printf("Expected: ");
       print_flt_vec(intensities);
       printf("\n");
-      return false;
+      return_value = false;
     }
 
-    return true;
+    return return_value;
   }
 
-  void ScanFrontCb(const sensor_msgs::msg::LaserScan & msg) { scan_front = msg; };
-  void ScanCenterCb(const sensor_msgs::msg::LaserScan & msg) { scan_center = msg; };
-  void ScanBackCb(const sensor_msgs::msg::LaserScan & msg) { scan_back = msg; };
+  void ScanFrontCb(const sensor_msgs::msg::LaserScan & msg) {
+    scan_front = msg;
+    scan_front_received = true;
+  };
+
+  void ScanCenterCb(const sensor_msgs::msg::LaserScan & msg) {
+    scan_center = msg;
+    scan_center_received = true;
+  };
+
+  void ScanBackCb(const sensor_msgs::msg::LaserScan & msg) {
+    scan_back = msg;
+    scan_back_received = true;
+  };
+
 };
 
 /**
@@ -178,11 +223,11 @@ TEST_F(LaserPluginTest, range_test)
 
   auto * obj = dynamic_cast<LaserPluginTest *>(this);
   auto sub_1 = node->create_subscription<sensor_msgs::msg::LaserScan>(
-    "scan", 1, std::bind(&LaserPluginTest::ScanFrontCb, obj, _1));
+    "robot1/scan", 1, std::bind(&LaserPluginTest::ScanFrontCb, obj, _1));
   auto sub_2 = node->create_subscription<sensor_msgs::msg::LaserScan>(
-    "scan_center", 1, std::bind(&LaserPluginTest::ScanCenterCb, obj, _1));
+    "robot1/scan_center", 1, std::bind(&LaserPluginTest::ScanCenterCb, obj, _1));
   auto sub_3 = node->create_subscription<sensor_msgs::msg::LaserScan>(
-    "scan_back", 1, std::bind(&LaserPluginTest::ScanBackCb, obj, _1));
+    "robot1/scan_back", 1, std::bind(&LaserPluginTest::ScanBackCb, obj, _1));
 
   auto * p1 = dynamic_cast<Laser *>(w->plugin_manager_.model_plugins_[0].get());
   auto * p2 = dynamic_cast<Laser *>(w->plugin_manager_.model_plugins_[1].get());
@@ -190,13 +235,16 @@ TEST_F(LaserPluginTest, range_test)
 
   // let it spin for 10 times to make sure the message gets through
   rclcpp::WallRate rate(500);
-  for (unsigned int i = 0; i < 10; i++) {
+  for (unsigned int i = 0; i < 100 && (!scan_front_received ||
+                                       !scan_center_received ||
+                                       !scan_back_received); i++) {
     w->Update(timekeeper);
     rclcpp::spin_some(node);
     rate.sleep();
   }
 
   // check scan returns
+  EXPECT_TRUE(scan_front_received);
   EXPECT_TRUE(ScanEq(
     scan_front, "r_laser_front", -M_PI / 2, M_PI / 2, M_PI / 2, 0.0, 0.0, 0.0, 5.0, {4.5, 4.4, 4.3},
     {}));
@@ -204,12 +252,14 @@ TEST_F(LaserPluginTest, range_test)
     << "Actual: " << p1->update_rate_;
   EXPECT_EQ(p1->body_, w->models_[0]->bodies_[0]);
 
+  EXPECT_TRUE(scan_center_received);
   EXPECT_TRUE(ScanEq(
     scan_center, "r_center_laser", 0, 2 * M_PI, M_PI / 2, 0.0, 0.0, 0.0, 5.0,
     {4.8, 4.7, 4.6, 4.9, 4.8}, {}));
   EXPECT_TRUE(fltcmp(p2->update_rate_, 5000)) << "Actual: " << p2->update_rate_;
   EXPECT_EQ(p2->body_, w->models_[0]->bodies_[0]);
 
+  EXPECT_TRUE(scan_back_received);
   EXPECT_TRUE(ScanEq(
     scan_back, "r_laser_back", 0, 2 * M_PI, M_PI / 2, 0.0, 0.0, 0.0, 4, {NAN, 3.2, 3.5, NAN, NAN},
     {}));
@@ -230,11 +280,11 @@ TEST_F(LaserPluginTest, intensity_test)
 
   auto * obj = dynamic_cast<LaserPluginTest *>(this);
   auto sub_1 = node->create_subscription<sensor_msgs::msg::LaserScan>(
-    "scan", 1, std::bind(&LaserPluginTest::ScanFrontCb, obj, _1));
+    "robot1/scan", 1, std::bind(&LaserPluginTest::ScanFrontCb, obj, _1));
   auto sub_2 = node->create_subscription<sensor_msgs::msg::LaserScan>(
-    "scan_center", 1, std::bind(&LaserPluginTest::ScanCenterCb, obj, _1));
+    "robot1/scan_center", 1, std::bind(&LaserPluginTest::ScanCenterCb, obj, _1));
   auto sub_3 = node->create_subscription<sensor_msgs::msg::LaserScan>(
-    "scan_back", 1, std::bind(&LaserPluginTest::ScanBackCb, obj, _1));
+    "robot1/scan_back", 1, std::bind(&LaserPluginTest::ScanBackCb, obj, _1));
 
   auto * p1 = dynamic_cast<Laser *>(w->plugin_manager_.model_plugins_[0].get());
   auto * p2 = dynamic_cast<Laser *>(w->plugin_manager_.model_plugins_[1].get());

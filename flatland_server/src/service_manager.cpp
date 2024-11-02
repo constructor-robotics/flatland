@@ -107,6 +107,9 @@ bool ServiceManager::ChangeRate(
     response->message = std::string(e.what());
   }
 
+  // Avoid -Wunused-parameter warnings - remove if parameter is used!
+  (void)request_header;
+
   return true;
 }
 
@@ -135,6 +138,9 @@ bool ServiceManager::SpawnModel(
       rclcpp::get_logger("ServiceManager"), "Failed to load model! Exception: %s", e.what());
   }
 
+  // Avoid -Wunused-parameter warnings - remove if parameter is used!
+  (void)request_header;
+
   return true;
 }
 
@@ -155,6 +161,9 @@ bool ServiceManager::DeleteModel(
     response->success = false;
     response->message = std::string(e.what());
   }
+
+  // Avoid -Wunused-parameter warnings - remove if parameter is used!
+  (void)request_header;
 
   return true;
 }
@@ -179,6 +188,9 @@ bool ServiceManager::MoveModel(
     response->message = std::string(e.what());
   }
 
+  // Avoid -Wunused-parameter warnings - remove if parameter is used!
+  (void)request_header;
+
   return true;
 }
 
@@ -188,6 +200,12 @@ bool ServiceManager::Pause(
   std::shared_ptr<std_srvs::srv::Empty::Response> response)
 {
   world_->Pause();
+
+  // Avoid -Wunused-parameter warnings - remove if parameter is used!
+  (void)request_header;
+  (void)request;
+  (void)response;
+
   return true;
 }
 
@@ -197,6 +215,12 @@ bool ServiceManager::Resume(
   std::shared_ptr<std_srvs::srv::Empty::Response> response)
 {
   world_->Resume();
+
+  // Avoid -Wunused-parameter warnings - remove if parameter is used!
+  (void)request_header;
+  (void)request;
+  (void)response;
+
   return true;
 }
 
@@ -206,6 +230,12 @@ bool ServiceManager::TogglePause(
   std::shared_ptr<std_srvs::srv::Empty::Response> response)
 {
   world_->TogglePaused();
+
+  // Avoid -Wunused-parameter warnings - remove if parameter is used!
+  (void)request_header;
+  (void)request;
+  (void)response;
+
   return true;
 }
 };  // namespace flatland_server

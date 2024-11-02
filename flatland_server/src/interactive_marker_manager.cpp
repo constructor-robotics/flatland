@@ -193,12 +193,18 @@ void InteractiveMarkerManager::processMouseDownFeedback(
   const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr & feedback)
 {
   manipulating_model_ = true;
+
+  // Avoid -Wunused-parameter warnings - remove if parameter is used!
+  (void)feedback;
 }
 
 void InteractiveMarkerManager::processPoseUpdateFeedback(
   const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr & feedback)
 {
   pose_update_stamp_ = rclcpp::Clock(RCL_SYSTEM_TIME).now();
+
+  // Avoid -Wunused-parameter warnings - remove if parameter is used!
+  (void)feedback;
 }
 
 void InteractiveMarkerManager::update()

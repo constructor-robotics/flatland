@@ -285,7 +285,7 @@ void Model::DebugOutput() const
     rclcpp::get_logger("Model"),
     "Model %p: physics_world(%p) name(%s) namespace(%s) "
     "num_bodies(%lu) num_joints(%lu)",
-    this, physics_world_, name_.c_str(), namespace_.c_str(), bodies_.size(), joints_.size());
+    (void*)this, (void*)physics_world_, name_.c_str(), namespace_.c_str(), bodies_.size(), joints_.size());
 
   for (const auto & body : bodies_) {
     body->DebugOutput();

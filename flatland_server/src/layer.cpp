@@ -105,6 +105,9 @@ Layer::Layer(
   const std::vector<std::string> & names, const Color & color, const YAML::Node & properties)
 : Entity(node, physics_world, names[0]), names_(names), cfr_(cfr), viz_name_("layers/l_" + names[0])
 {
+  // Avoid -Wunused-parameter warnings - remove if parameter is used!
+  (void)color;
+  (void)properties;
 }
 
 Layer::~Layer() { delete body_; }
@@ -327,7 +330,7 @@ void Layer::DebugOutput() const
     rclcpp::get_logger("Layer"),
     "Layer %p: physics_world(%p) name(%s) names(%s) "
     "category_bits(0x%X)",
-    this, physics_world_, name_.c_str(), names.c_str(), category_bits);
+    (void*)this, (void*)physics_world_, name_.c_str(), names.c_str(), category_bits);
 
   if (body_ != nullptr) {
     body_->DebugOutput();

@@ -86,16 +86,27 @@ public:
     function_called["PostSolve"] = false;
   }
 
-  void OnInitialize(const YAML::Node & config) override { function_called["OnInitialize"] = true; }
+  void OnInitialize(const YAML::Node & config) override {
+    function_called["OnInitialize"] = true;
+
+    // Avoid -Wunused-parameter warnings - remove if parameter is used!
+    (void)config;
+  }
 
   void BeforePhysicsStep(const Timekeeper & timekeeper) override
   {
     function_called["BeforePhysicsStep"] = true;
+
+    // Avoid -Wunused-parameter warnings - remove if parameter is used!
+    (void)timekeeper;
   }
 
   void AfterPhysicsStep(const Timekeeper & timekeeper) override
   {
     function_called["AfterPhysicsStep"] = true;
+
+    // Avoid -Wunused-parameter warnings - remove if parameter is used!
+    (void)timekeeper;
   }
 
   void BeginContact(b2Contact * contact) override
@@ -114,12 +125,18 @@ public:
   {
     function_called["PreSolve"] = true;
     FilterContact(contact, entity, fixture_A, fixture_B);
+
+    // Avoid -Wunused-parameter warnings - remove if parameter is used!
+    (void)oldManifold;
   }
 
   void PostSolve(b2Contact * contact, const b2ContactImpulse * impulse) override
   {
     function_called["PostSolve"] = true;
     FilterContact(contact, entity, fixture_A, fixture_B);
+
+    // Avoid -Wunused-parameter warnings - remove if parameter is used!
+    (void)impulse;
   }
 };
 

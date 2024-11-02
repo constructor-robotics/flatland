@@ -72,8 +72,8 @@ public:
   std::string namespace_;            ///< namespace of the model
   std::vector<ModelBody *> bodies_;  ///< list of bodies in the model
   std::vector<Joint *> joints_;      ///< list of joints in the model
-  YamlReader plugins_reader_;        ///< for storing plugins when paring YAML
   CollisionFilterRegistry * cfr_;    ///< Collision filter registry
+  YamlReader plugins_reader_;        ///< for storing plugins when paring YAML
   std::string viz_name_;             ///< used for visualization
 
   /**

@@ -78,6 +78,11 @@ float RayTrace::ReportFixture(
   }
   is_hit_ = true;
   fraction_ = fraction;
+
+  // Avoid -Wunused-parameter warnings - remove if parameter is used!
+  (void)point;
+  (void)normal;
+
   return fraction;
 }
 
