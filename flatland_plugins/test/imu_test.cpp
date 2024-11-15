@@ -8,7 +8,7 @@
  *     \/_/\/_/\/__/    \/_/\/__,_ /\/___/  \/___/  \/__/\/___/
  * @copyright Copyright 2017 Avidbots Corp.
  * @name  imu_test.cpp
- * @brief test diff drive plugin
+ * @brief imu plugin load test
  * @author Chunshang Li
  *
  * Software License Agreement (BSD License)
@@ -44,21 +44,23 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <flatland_plugins/imu.h>
 #include <flatland_server/model_plugin.h>
 #include <gtest/gtest.h>
-#include <pluginlib/class_loader.h>
-#include <ros/ros.h>
 
-TEST(ImuPluginTest, load_test) {
+#include <pluginlib/class_loader.hpp>
+#include <rclcpp/rclcpp.hpp>
+
+TEST(ImuPluginTest, load_test)
+{
+  std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("test_imu_plugin");
   pluginlib::ClassLoader<flatland_server::ModelPlugin> loader(
-      "flatland_server", "flatland_server::ModelPlugin");
+    "flatland_server", "flatland_server::ModelPlugin");
 
   try {
-    boost::shared_ptr<flatland_server::ModelPlugin> plugin =
-        loader.createInstance("flatland_plugins::Imu");
-  } catch (pluginlib::PluginlibException& e) {
-    FAIL() << "Failed to load imu plugin. " << e.what();
+    std::shared_ptr<flatland_server::ModelPlugin> plugin =
+      loader.createSharedInstance("flatland_plugins::Imu");
+  } catch (pluginlib::PluginlibException & e) {
+    FAIL() << "Failed to load GPS plugin. " << e.what();
   }
 }
 

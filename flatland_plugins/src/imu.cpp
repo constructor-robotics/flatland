@@ -48,15 +48,14 @@
 #include <flatland_plugins/imu.h>
 #include <flatland_server/debug_visualization.h>
 #include <flatland_server/model_plugin.h>
-#include <geometry_msgs/TransformStamped.h>
-#include <pluginlib/class_list_macros.h>
-#include <ros/ros.h>
-#include <tf/tf.h>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <pluginlib/class_list_macros.hpp>
+#include <tf2/LinearMath/Quaternion.h>
 
 namespace flatland_plugins {
 
 void Imu::OnInitialize(const YAML::Node& config) {
-  YamlReader reader(config);
+  YamlReader reader(node_, config);
   enable_imu_pub_ = reader.Get<bool>("enable_imu_pub", true);
 
   std::string body_name = reader.Get<std::string>("body");
@@ -114,12 +113,12 @@ void Imu::OnInitialize(const YAML::Node& config) {
     throw YAMLException("Body with name " + Q(body_name) + " does not exist");
   }
 
-  imu_pub_ = nh_.advertise<sensor_msgs::Imu>(imu_topic, 1);
-  ground_truth_pub_ = nh_.advertise<sensor_msgs::Imu>(ground_truth_topic, 1);
+  imu_pub_ = node_->create_publisher<sensor_msgs::msg::Imu>(imu_topic, 1);
+  ground_truth_pub_ = node_->create_publisher<sensor_msgs::msg::Imu>(ground_truth_topic, 1);
 
   // init the values for the messages
   ground_truth_msg_.header.frame_id = imu_frame_id_;
-  tf::resolve("", GetModel()->NameSpaceTF(body_->name_));
+  // tf::resolve("", GetModel()->NameSpaceTF(body_->name_));
   ground_truth_msg_.orientation_covariance.fill(0);
   ground_truth_msg_.angular_velocity_covariance.fill(0);
   ground_truth_msg_.linear_acceleration_covariance.fill(0);
@@ -151,10 +150,8 @@ void Imu::OnInitialize(const YAML::Node& config) {
         0.0, sqrt(linear_acceleration_noise[i]));
   }
 
-  imu_tf_.header.frame_id = tf::resolve(
-      "", GetModel()->NameSpaceTF(body_->GetName()));  // Todo: parent_tf param
-  imu_tf_.child_frame_id =
-      tf::resolve("", GetModel()->NameSpaceTF(imu_frame_id_));
+  imu_tf_.header.frame_id = GetModel()->NameSpaceTF(body_->GetName());  // Todo: parent_tf param
+  imu_tf_.child_frame_id =  GetModel()->NameSpaceTF(imu_frame_id_);
   imu_tf_.transform.translation.x = 0;  // origin_.x; TODO: read position
   imu_tf_.transform.translation.y = 0;  // origin_.y;
   imu_tf_.transform.translation.z = 0;
@@ -163,19 +160,19 @@ void Imu::OnInitialize(const YAML::Node& config) {
   imu_tf_.transform.rotation.z = 0;  // q.z();
   imu_tf_.transform.rotation.w = 1;  // q.w();
 
-  ROS_DEBUG_NAMED(
-      "Imu",
-      "Initialized with params body(%p %s) imu_frame_id(%s) "
-      "imu_pub(%s) ground_truth_pub(%s) "
-      "orientation_noise({%f,%f,%f}) angular_velocity_noise({%f,%f,%f}) "
-      "linear_acceleration_velocity({%f,%f,%f}) "
-      "pub_rate(%f)\n",
-      body_, body_->name_.c_str(), imu_frame_id_.c_str(), imu_topic.c_str(),
-      ground_truth_topic.c_str(), orientation_noise[0], orientation_noise[1],
-      orientation_noise[2], angular_velocity_noise[0],
-      angular_velocity_noise[1], angular_velocity_noise[2],
-      linear_acceleration_noise[0], linear_acceleration_noise[1],
-      linear_acceleration_noise[2], pub_rate_);
+  RCLCPP_DEBUG(
+    rclcpp::get_logger("Imu"),
+    "Initialized with params body(%p %s) imu_frame_id(%s) "
+    "imu_pub(%s) ground_truth_pub(%s) "
+    "orientation_noise({%f,%f,%f}) angular_velocity_noise({%f,%f,%f}) "
+    "linear_acceleration_velocity({%f,%f,%f}) "
+    "pub_rate(%f)\n",
+    body_, body_->name_.c_str(), imu_frame_id_.c_str(), imu_topic.c_str(),
+    ground_truth_topic.c_str(), orientation_noise[0], orientation_noise[1],
+    orientation_noise[2], angular_velocity_noise[0],
+    angular_velocity_noise[1], angular_velocity_noise[2],
+    linear_acceleration_noise[0], linear_acceleration_noise[1],
+    linear_acceleration_noise[2], pub_rate_);
 }
 
 void Imu::AfterPhysicsStep(const Timekeeper& timekeeper) {
@@ -192,8 +189,13 @@ void Imu::AfterPhysicsStep(const Timekeeper& timekeeper) {
   if (publish) {
     // get the state of the body and publish the data
 
-    ground_truth_msg_.header.stamp = ros::Time::now();
-    ground_truth_msg_.orientation = tf::createQuaternionMsgFromYaw(angle);
+    ground_truth_msg_.header.stamp = timekeeper.GetSimTime();
+    tf2::Quaternion q;
+    q.setRPY(0, 0, angle);
+    ground_truth_msg_.orientation.x = q.x();
+    ground_truth_msg_.orientation.y = q.y();
+    ground_truth_msg_.orientation.z = q.z();
+    ground_truth_msg_.orientation.w = q.w();
     ground_truth_msg_.angular_velocity.z = angular_vel;
 
     double global_acceleration_x =
@@ -210,10 +212,14 @@ void Imu::AfterPhysicsStep(const Timekeeper& timekeeper) {
     // 1, "" << linear_vel_local.x << " " << linear_vel_local_prev.x << " "
     //<< pub_rate_);
     // add the noise to odom messages
-    imu_msg_.header.stamp = ros::Time::now();
+    imu_msg_.header.stamp = timekeeper.GetSimTime();
 
-    imu_msg_.orientation =
-        tf::createQuaternionMsgFromYaw(angle + noise_gen_[2](rng_));
+    tf2::Quaternion q2;
+    q2.setRPY(0, 0, angle + noise_gen_[2](rng_));
+    imu_msg_.orientation.x = q.x();
+    imu_msg_.orientation.y = q.y();
+    imu_msg_.orientation.z = q.z();
+    imu_msg_.orientation.w = q.w();
 
     imu_msg_.angular_velocity = ground_truth_msg_.angular_velocity;
     imu_msg_.angular_velocity.z += noise_gen_[5](rng_);
@@ -223,15 +229,15 @@ void Imu::AfterPhysicsStep(const Timekeeper& timekeeper) {
     imu_msg_.linear_acceleration.y += noise_gen_[7](rng_);
 
     if (enable_imu_pub_) {
-      ground_truth_pub_.publish(ground_truth_msg_);
-      imu_pub_.publish(imu_msg_);
+      ground_truth_pub_->publish(ground_truth_msg_);
+      imu_pub_->publish(imu_msg_);
     }
     linear_vel_local_prev = linear_vel_local;
   }
 
   if (broadcast_tf_) {
-    imu_tf_.header.stamp = ros::Time::now();
-    tf_broadcaster_.sendTransform(imu_tf_);
+    imu_tf_.header.stamp = timekeeper.GetSimTime();
+    tf_broadcaster_->sendTransform(imu_tf_);
   }
 }
 }

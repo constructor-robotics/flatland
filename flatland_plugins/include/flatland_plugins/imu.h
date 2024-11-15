@@ -48,10 +48,11 @@
 #include <flatland_plugins/update_timer.h>
 #include <flatland_server/model_plugin.h>
 #include <flatland_server/timekeeper.h>
-#include <geometry_msgs/Twist.h>
+#include <geometry_msgs/msg/twist.hpp>
 #include <random>
-#include <sensor_msgs/Imu.h>
-#include <tf/transform_broadcaster.h>
+#include <sensor_msgs/msg/imu.hpp>
+#include <tf2_ros/transform_broadcaster.h>
+#include <rclcpp/rclcpp.hpp>
 
 #ifndef FLATLAND_PLUGINS_IMU_H
 #define FLATLAND_PLUGINS_IMU_H
@@ -62,18 +63,18 @@ namespace flatland_plugins {
 
 class Imu : public flatland_server::ModelPlugin {
  public:
-  ros::Publisher imu_pub_;
-  ros::Publisher ground_truth_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr ground_truth_pub_;
   Body* body_;
-  sensor_msgs::Imu imu_msg_;
-  sensor_msgs::Imu ground_truth_msg_;
+  sensor_msgs::msg::Imu imu_msg_;
+  sensor_msgs::msg::Imu ground_truth_msg_;
   UpdateTimer update_timer_;
   bool enable_imu_pub_;  ///< YAML parameter to enable odom publishing
 
   std::default_random_engine rng_;
   std::array<std::normal_distribution<double>, 9> noise_gen_;
-  geometry_msgs::TransformStamped imu_tf_;   ///< tf from body to IMU frame
-  tf::TransformBroadcaster tf_broadcaster_;  ///< broadcast IMU frame
+  geometry_msgs::msg::TransformStamped imu_tf_;   ///< tf from body to IMU frame
+  std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;  ///< broadcast GPS frame
   std::string imu_frame_id_;
   bool broadcast_tf_;
   b2Vec2 linear_vel_local_prev;
@@ -95,7 +96,7 @@ class Imu : public flatland_server::ModelPlugin {
    * @brief       callback to apply twist (velocity and omega)
    * @param[in]   timestep how much the physics time will increment
    */
-  void TwistCallback(const geometry_msgs::Twist& msg);
+  void TwistCallback(const geometry_msgs::msg::Twist& msg);
 };
 };
 
