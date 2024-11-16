@@ -231,7 +231,7 @@ void DiffDrive::BeforePhysicsStep(const Timekeeper & timekeeper)
     if (enable_twist_pub_) {
       // Transform global frame velocity into local frame to simulate encoder
       // readings
-      geometry_msgs::msg::TwistStamped twist_pub_msg;
+      geometry_msgs::msg::TwistWithCovarianceStamped twist_pub_msg;
       twist_pub_msg.header.stamp = timekeeper.GetSimTime();
       twist_pub_msg.header.frame_id = odom_msg_.child_frame_id;
 
@@ -245,7 +245,7 @@ void DiffDrive::BeforePhysicsStep(const Timekeeper & timekeeper)
 
       twist_pub_msg.twist.covariance = odom_msg_.twist.covariance;
 
-      twist_pub_.publish(twist_pub_msg);
+      twist_pub_->publish(twist_pub_msg);
     }
 
     // publish odom tf

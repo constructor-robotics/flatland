@@ -63,7 +63,7 @@ public:
   UpdateTimer update_timer_;
   int update_counter_;
 
-  void OnInitialize(const YAML::Node & config) override
+  void OnInitialize(const YAML::Node &) override
   {
     update_timer_.SetRate(0);
     update_counter_ = 0;

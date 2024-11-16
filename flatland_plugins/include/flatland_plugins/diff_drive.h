@@ -51,6 +51,7 @@
 #include <tf2_ros/transform_broadcaster.h>
 
 #include <geometry_msgs/msg/twist_stamped.hpp>
+#include <geometry_msgs/msg/twist_with_covariance_stamped.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <random>
 
@@ -68,7 +69,7 @@ public:
   rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::SharedPtr twist_sub_;
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr ground_truth_pub_;
-  rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr twist_pub_;
+  rclcpp::Publisher<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr twist_pub_;
   Body * body_;
   geometry_msgs::msg::TwistStamped::SharedPtr twist_msg_ = std::make_shared<geometry_msgs::msg::TwistStamped>();
   nav_msgs::msg::Odometry odom_msg_;
