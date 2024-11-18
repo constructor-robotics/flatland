@@ -78,6 +78,8 @@ void Imu::OnInitialize(const YAML::Node& config) {
   update_timer_.SetRate(pub_rate_);
 
   broadcast_tf_ = reader.Get<bool>("broadcast_tf", true);
+  tf_broadcaster_ =
+      std::make_shared<tf2_ros::TransformBroadcaster>(node_);
 
   // by default the covariance diagonal is the variance of actual noise
   // generated, non-diagonal elements are zero assuming the noises are
