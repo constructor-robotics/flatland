@@ -55,6 +55,9 @@ velocities and odometries are w.r.t. the robot origin
       # ground truth and noisy odometry
       enable_odom_pub: true
       
+      # optional, defaults to true, enables the publication of map->odom tf
+      enable_odom_tf: true
+
       # optional, defaults to true, enables the advertising and publishing of noisy local
       # frame velocity
       enable_twist_pub: true

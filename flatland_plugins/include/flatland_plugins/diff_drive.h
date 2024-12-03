@@ -77,6 +77,7 @@ public:
   UpdateTimer update_timer_;
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;  ///< For publish ROS TF
   bool enable_odom_pub_;   ///< YAML parameter to enable odom publishing
+  bool enable_odom_tf_;    ///< YAML parameter to enable publishing map->odom TF
   bool enable_twist_pub_;  ///< YAML parameter to enable twist publishing
   bool twist_in_local_frame_;  ///< YAML parameter to publish velocity in local
                                /// frame. Original diff drive plugin publishes

@@ -57,6 +57,8 @@ namespace flatland_plugins {
 void Imu::OnInitialize(const YAML::Node& config) {
   YamlReader reader(node_, config);
   enable_imu_pub_ = reader.Get<bool>("enable_imu_pub", true);
+  enable_imu_gravity_ = reader.Get<bool>("enable_imu_gravity", true);
+
 
   std::string body_name = reader.Get<std::string>("body");
   imu_frame_id_ = reader.Get<std::string>("imu_frame_id", "imu");
@@ -205,10 +207,17 @@ void Imu::AfterPhysicsStep(const Timekeeper& timekeeper) {
     double global_acceleration_y =
         (linear_vel_local.y - linear_vel_local_prev.y) * pub_rate_;
 
+    double global_acceleration_z = 0.0;
+    if (enable_imu_gravity_) {
+      global_acceleration_z = -9.81;
+    }
+
     ground_truth_msg_.linear_acceleration.x =
         cos(angle) * global_acceleration_x + sin(angle) * global_acceleration_y;
     ground_truth_msg_.linear_acceleration.y =
         sin(angle) * global_acceleration_x + cos(angle) * global_acceleration_y;
+
+    ground_truth_msg_.linear_acceleration.z = global_acceleration_z;
 
     // ROS_INFO_STREAM_THROTTLE(
     // 1, "" << linear_vel_local.x << " " << linear_vel_local_prev.x << " "
@@ -229,6 +238,7 @@ void Imu::AfterPhysicsStep(const Timekeeper& timekeeper) {
     imu_msg_.linear_acceleration = ground_truth_msg_.linear_acceleration;
     imu_msg_.linear_acceleration.x += noise_gen_[6](rng_);
     imu_msg_.linear_acceleration.y += noise_gen_[7](rng_);
+    imu_msg_.linear_acceleration.z += noise_gen_[8](rng_);
 
     if (enable_imu_pub_) {
       ground_truth_pub_->publish(ground_truth_msg_);

@@ -69,7 +69,8 @@ class Imu : public flatland_server::ModelPlugin {
   sensor_msgs::msg::Imu imu_msg_;
   sensor_msgs::msg::Imu ground_truth_msg_;
   UpdateTimer update_timer_;
-  bool enable_imu_pub_;  ///< YAML parameter to enable odom publishing
+  bool enable_imu_pub_;  ///< YAML parameter to enable imu publishing
+  bool enable_imu_gravity_;  ///< YAML parameter to enable gravity in imu
 
   std::default_random_engine rng_;
   std::array<std::normal_distribution<double>, 9> noise_gen_;
