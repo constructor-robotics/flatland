@@ -30,6 +30,7 @@ public:
                           /// frame
   double ref_lon_rad_;    ///< longitude in radians corresponding to (0, 0) in map
                           /// frame
+  double ref_yaw_rad_;    ///< Yaw offset (CCW+) that the map's X axis deviates from East (towards north)
   double ref_ecef_x_;     ///< ECEF coordinates of reference lat and lon at zero
                           /// altitude
   double ref_ecef_y_;     ///< ECEF coordinates of reference lat and lon at zero
@@ -42,12 +43,16 @@ public:
   static double WGS84_A;   ///< Earth's major axis length
   static double WGS84_E2;  ///< Square of Earth's first eccentricity
 
+
+
   rclcpp::Publisher<sensor_msgs::msg::NavSatFix>::SharedPtr
     fix_publisher_;                                                ///< GPS fix topic publisher
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;  ///< broadcast GPS frame
   geometry_msgs::msg::TransformStamped gps_tf_;                    ///< tf from body to GPS frame
   sensor_msgs::msg::NavSatFix gps_fix_;  ///< message for publishing output
   UpdateTimer update_timer_;             ///< for controlling update rate
+
+  Eigen::Matrix3f m_enu_to_world_;  ///< rotation matrix ENU coordinates to map coordinates
 
   Eigen::Matrix3f m_body_to_gps_;  ///< tf from body to GPS
 

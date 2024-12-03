@@ -21,6 +21,11 @@ void Gps::OnInitialize(const YAML::Node & config)
   double s = sin(origin_.theta);
   double x = origin_.x, y = origin_.y;
   m_body_to_gps_ << c, -s, x, s, c, y, 0, 0, 1;
+
+  c = cos(ref_yaw_rad_);
+  s = sin(ref_yaw_rad_);
+  m_enu_to_world_ << c, -s, 0, s, c, 0, 0, 0, 1;
+
 }
 
 void Gps::BeforePhysicsStep(const Timekeeper & timekeeper)
@@ -62,7 +67,7 @@ void Gps::UpdateFix()
   const b2Transform & t = body_->GetPhysicsBody()->GetTransform();
   Eigen::Matrix3f m_world_to_body;
   m_world_to_body << t.q.c, -t.q.s, t.p.x, t.q.s, t.q.c, t.p.y, 0, 0, 1;
-  Eigen::Matrix3f m_world_to_gps = m_world_to_body * m_body_to_gps_;
+  Eigen::Matrix3f m_world_to_gps = m_enu_to_world_ * m_world_to_body * m_body_to_gps_;
   b2Vec2 gps_pos(m_world_to_gps(0, 2), m_world_to_gps(1, 2));
 
   /* Convert simulation position into ECEF coordinates */
@@ -104,6 +109,7 @@ void Gps::ParseParameters(const YAML::Node & config)
   update_rate_ = reader.Get<double>("update_rate", 10.0);
   ref_lat_rad_ = M_PI / 180.0 * reader.Get<double>("ref_lat", 0.0);
   ref_lon_rad_ = M_PI / 180.0 * reader.Get<double>("ref_lon", 0.0);
+  ref_yaw_rad_ = reader.Get<double>("ref_yaw_radians", 0.0);
   ComputeReferenceEcef();
   origin_ = reader.GetPose("origin", Pose(0, 0, 0));
 
