@@ -180,7 +180,9 @@ void Imu::OnInitialize(const YAML::Node& config) {
 }
 
 void Imu::AfterPhysicsStep(const Timekeeper& timekeeper) {
-  bool publish = update_timer_.CheckUpdate(timekeeper);
+  if (!update_timer_.CheckUpdate(timekeeper)) {
+    return;  // return if we're not ready to publish
+  }
 
   b2Body* b2body = body_->physics_body_;
 
@@ -190,68 +192,66 @@ void Imu::AfterPhysicsStep(const Timekeeper& timekeeper) {
       b2body->GetLinearVelocityFromLocalPoint(b2Vec2(0, 0));
   float angular_vel = b2body->GetAngularVelocity();
 
-  if (publish) {
-    // get the state of the body and publish the data
+  // get the state of the body and publish the data
 
-    ground_truth_msg_.header.stamp = timekeeper.GetSimTime();
-    tf2::Quaternion q;
-    q.setRPY(0, 0, angle);
-    ground_truth_msg_.orientation.x = q.x();
-    ground_truth_msg_.orientation.y = q.y();
-    ground_truth_msg_.orientation.z = q.z();
-    ground_truth_msg_.orientation.w = q.w();
-    ground_truth_msg_.angular_velocity.z = angular_vel;
+  ground_truth_msg_.header.stamp = timekeeper.GetSimTime();
+  tf2::Quaternion q;
+  q.setRPY(0, 0, angle);
+  ground_truth_msg_.orientation.x = q.x();
+  ground_truth_msg_.orientation.y = q.y();
+  ground_truth_msg_.orientation.z = q.z();
+  ground_truth_msg_.orientation.w = q.w();
+  ground_truth_msg_.angular_velocity.z = angular_vel;
 
-    double global_acceleration_x =
-        (linear_vel_local.x - linear_vel_local_prev.x) * pub_rate_;
-    double global_acceleration_y =
-        (linear_vel_local.y - linear_vel_local_prev.y) * pub_rate_;
+  double global_acceleration_x =
+      (linear_vel_local.x - linear_vel_local_prev.x) * pub_rate_;
+  double global_acceleration_y =
+      (linear_vel_local.y - linear_vel_local_prev.y) * pub_rate_;
 
-    double global_acceleration_z = 0.0;
-    if (enable_imu_gravity_) {
-      global_acceleration_z = -9.81;
-    }
-
-    ground_truth_msg_.linear_acceleration.x =
-        cos(angle) * global_acceleration_x + sin(angle) * global_acceleration_y;
-    ground_truth_msg_.linear_acceleration.y =
-        sin(angle) * global_acceleration_x + cos(angle) * global_acceleration_y;
-
-    ground_truth_msg_.linear_acceleration.z = global_acceleration_z;
-
-    // ROS_INFO_STREAM_THROTTLE(
-    // 1, "" << linear_vel_local.x << " " << linear_vel_local_prev.x << " "
-    //<< pub_rate_);
-    // add the noise to odom messages
-    imu_msg_.header.stamp = timekeeper.GetSimTime();
-
-    tf2::Quaternion q2;
-    q2.setRPY(0, 0, angle + noise_gen_[2](rng_));
-    imu_msg_.orientation.x = q.x();
-    imu_msg_.orientation.y = q.y();
-    imu_msg_.orientation.z = q.z();
-    imu_msg_.orientation.w = q.w();
-
-    imu_msg_.angular_velocity = ground_truth_msg_.angular_velocity;
-    imu_msg_.angular_velocity.z += noise_gen_[5](rng_);
-
-    imu_msg_.linear_acceleration = ground_truth_msg_.linear_acceleration;
-    imu_msg_.linear_acceleration.x += noise_gen_[6](rng_);
-    imu_msg_.linear_acceleration.y += noise_gen_[7](rng_);
-    imu_msg_.linear_acceleration.z += noise_gen_[8](rng_);
-
-    if (enable_imu_pub_) {
-      ground_truth_pub_->publish(ground_truth_msg_);
-      imu_pub_->publish(imu_msg_);
-    }
-    linear_vel_local_prev = linear_vel_local;
+  double global_acceleration_z = 0.0;
+  if (enable_imu_gravity_) {
+    global_acceleration_z = -9.81;
   }
+
+  ground_truth_msg_.linear_acceleration.x =
+      cos(angle) * global_acceleration_x + sin(angle) * global_acceleration_y;
+  ground_truth_msg_.linear_acceleration.y =
+      sin(angle) * global_acceleration_x + cos(angle) * global_acceleration_y;
+
+  ground_truth_msg_.linear_acceleration.z = global_acceleration_z;
+
+  // ROS_INFO_STREAM_THROTTLE(
+  // 1, "" << linear_vel_local.x << " " << linear_vel_local_prev.x << " "
+  //<< pub_rate_);
+  // add the noise to odom messages
+  imu_msg_.header.stamp = timekeeper.GetSimTime();
+
+  tf2::Quaternion q2;
+  q2.setRPY(0, 0, angle + noise_gen_[2](rng_));
+  imu_msg_.orientation.x = q.x();
+  imu_msg_.orientation.y = q.y();
+  imu_msg_.orientation.z = q.z();
+  imu_msg_.orientation.w = q.w();
+
+  imu_msg_.angular_velocity = ground_truth_msg_.angular_velocity;
+  imu_msg_.angular_velocity.z += noise_gen_[5](rng_);
+
+  imu_msg_.linear_acceleration = ground_truth_msg_.linear_acceleration;
+  imu_msg_.linear_acceleration.x += noise_gen_[6](rng_);
+  imu_msg_.linear_acceleration.y += noise_gen_[7](rng_);
+  imu_msg_.linear_acceleration.z += noise_gen_[8](rng_);
+
+  if (enable_imu_pub_) {
+    ground_truth_pub_->publish(ground_truth_msg_);
+    imu_pub_->publish(imu_msg_);
+  }
+  linear_vel_local_prev = linear_vel_local;
 
   if (broadcast_tf_) {
     imu_tf_.header.stamp = timekeeper.GetSimTime();
     tf_broadcaster_->sendTransform(imu_tf_);
   }
 }
-}
+} // end namespace
 
 PLUGINLIB_EXPORT_CLASS(flatland_plugins::Imu, flatland_server::ModelPlugin)

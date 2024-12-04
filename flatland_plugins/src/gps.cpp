@@ -97,6 +97,8 @@ void Gps::UpdateFix()
   }
   gps_fix_.latitude = lat_rad * 180.0 * M_1_PI;
   gps_fix_.altitude = 0.0;
+  gps_fix_.position_covariance_type = gps_fix_.COVARIANCE_TYPE_DIAGONAL_KNOWN;
+  gps_fix_.position_covariance = position_covariance_;
 }
 
 void Gps::ParseParameters(const YAML::Node & config)
@@ -110,6 +112,8 @@ void Gps::ParseParameters(const YAML::Node & config)
   ref_lat_rad_ = M_PI / 180.0 * reader.Get<double>("ref_lat", 0.0);
   ref_lon_rad_ = M_PI / 180.0 * reader.Get<double>("ref_lon", 0.0);
   ref_yaw_rad_ = reader.Get<double>("ref_yaw_radians", 0.0);
+  position_covariance_ = reader.GetArray<double, 9>(
+      "position_cavariance", std::array<double, 9>{1e-2, 0, 0,  0, 1e-2, 0,  0, 0, 1e-2});
   ComputeReferenceEcef();
   origin_ = reader.GetPose("origin", Pose(0, 0, 0));
 

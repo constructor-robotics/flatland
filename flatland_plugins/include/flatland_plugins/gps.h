@@ -56,6 +56,8 @@ public:
 
   Eigen::Matrix3f m_body_to_gps_;  ///< tf from body to GPS
 
+  std::array<double, 9> position_covariance_;
+
   /**
    * @brief Initialization for the plugin
    * @param[in] config Plugin YAML Node

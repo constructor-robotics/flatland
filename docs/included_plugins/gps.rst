@@ -57,3 +57,6 @@ This plugin provides a simple simulation of a perfectly-accurate GPS receiver.
       # optional, default to [0, 0, 0], in the form of [x, y, yaw], the position
       # and orientation to place GPS antenna relative to specified model body
       origin: [0, 0, 0]
+
+      # 3x3 covariance matrix for x/y/z
+      position_covariance: [1e-2, 0, 0,   0, 1e-2, 0,   0, 0, 1e-2]
