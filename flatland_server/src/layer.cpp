@@ -164,11 +164,8 @@ Layer * Layer::MakeLayer(
           "Failed to load " + Q(image_path.string()) + " in layer " + Q(names[0]));
       }
 
-      cv::Mat bitmap;
-      map.convertTo(bitmap, CV_32FC1, 1.0 / 255.0);
-
       return new Layer(
-        node, physics_world, cfr, names, color, origin, bitmap, occupied_thresh, resolution,
+        node, physics_world, cfr, names, color, origin, map, occupied_thresh, resolution,
         properties);
     }
   } else {  // If the layer has no static obstacles
@@ -230,7 +227,7 @@ void Layer::LoadFromBitmap(const cv::Mat & bitmap, double occupied_thresh, doubl
 
   // thresholds the map, values between the occupied threshold and 1.0 are
   // considered to be occupied
-  cv::inRange(bitmap, occupied_thresh, 1.0, obstacle_map);
+  cv::threshold(bitmap, obstacle_map, int(occupied_thresh*bitmap.depth()), int(255), cv::THRESH_BINARY);
 
   // pad the top and bottom of the map each with an empty row (255=white). This
   // helps to look at the transition from one row of pixel to another
