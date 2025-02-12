@@ -92,10 +92,10 @@ void DiffDrive::OnInitialize(const YAML::Node & config)
   update_timer_.SetRate(pub_rate);
 
   // Angular dynamics constraints
-  angular_dynamics_.Configure(reader.SubnodeOpt("angular_dynamics", YamlReader::MAP).Node());
+  angular_dynamics_.Configure(node_, reader.SubnodeOpt("angular_dynamics", YamlReader::MAP).Node());
 
   // Linear dynamics constraints
-  linear_dynamics_.Configure(reader.SubnodeOpt("linear_dynamics", YamlReader::MAP).Node());
+  linear_dynamics_.Configure(node_, reader.SubnodeOpt("linear_dynamics", YamlReader::MAP).Node());
 
   // by default the covariance diagonal is the variance of actual noise
   // generated, non-diagonal elements are zero assuming the noises are
@@ -190,8 +190,8 @@ void DiffDrive::BeforePhysicsStep(const Timekeeper & timekeeper)
 
   // Apply dynamics limits
   double dt = timekeeper.GetStepSize();
-  linear_velocity_ = linear_dynamics_.Limit(linear_velocity_, twist_msg_.linear.x, dt);
-  angular_velocity_ = angular_dynamics_.Limit(angular_velocity_, twist_msg_.angular.z, dt);
+  linear_velocity_ = linear_dynamics_.Limit(linear_velocity_, twist_msg_->twist.linear.x, dt);
+  angular_velocity_ = angular_dynamics_.Limit(angular_velocity_, twist_msg_->twist.angular.z, dt);
 
   // we apply the twist velocities, this must be done every physics step to make
   // sure Box2D solver applies the correct velocity through out. The velocity

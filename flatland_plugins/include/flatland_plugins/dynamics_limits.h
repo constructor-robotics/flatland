@@ -74,7 +74,7 @@ class DynamicsLimits {
    * @brief        Constructor from yaml configuration file node
    * @param[in]    YAML::Node& configuration node
    */
-   void Configure(const YAML::Node &config);
+   void Configure(std::shared_ptr<rclcpp::Node> node, const YAML::Node &config);
 
   /**
    * @name          Saturate
@@ -92,7 +92,6 @@ class DynamicsLimits {
    * @return        The new velocity result after target velocity has been subjected to limits
    */
    double Limit(double velocity, double target_velocity, double timestep);
-
 };
 
 };
