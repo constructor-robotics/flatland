@@ -167,8 +167,13 @@ void DebugVisualization::BodyToMarkers(visualization_msgs::MarkerArray& markers,
           p.y = poly->m_vertices[i].y;
           marker.points.push_back(p);
         }
-        marker.points.push_back(marker.points[0]);  // Close the shape
 
+        if (marker.points.size() > 0){
+          marker.points.push_back(marker.points[0]);  // Close the shape
+        }
+        else {
+          add_marker = false; // Don't add empty markers
+        }
       } break;
 
       case b2Shape::e_edge: {    // Convert b2Edge -> LINE_LIST
@@ -216,10 +221,13 @@ void DebugVisualization::BodyToMarkers(visualization_msgs::MarkerArray& markers,
           marker.points.push_back(p);
         }
 
-        // close loop
-        p.x = chain->m_vertices[0].x;
-        p.y = chain->m_vertices[0].y;
-        marker.points.push_back(p);
+        if (marker.points.size() > 0){
+          // close loop
+          marker.points.push_back(marker.points[0]);
+        }
+        else {
+          add_marker = false; // Don't add empty markers
+        }
       } break;
 
       default:  // Unsupported shape
