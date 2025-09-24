@@ -125,7 +125,7 @@ void SimulationManager::Main(bool benchmark) {
     world_->Update(timekeeper_);  // Step physics by ros cycle time
 
     if (show_viz_ && update_viz) {
-      world_->DebugVisualize(false);  // no need to update layer
+      world_->DebugVisualize(true);
       DebugVisualization::Get().Publish(
           timekeeper_);  // publish debug visualization
     }
