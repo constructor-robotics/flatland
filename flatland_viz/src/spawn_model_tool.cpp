@@ -49,6 +49,7 @@
 #include <OGRE/OgreException.h>
 #include <OGRE/OgreMaterial.h>
 #include <OGRE/OgreSubEntity.h>
+#include <OGRE/OgreTechnique.h>
 
 #include <QFileDialog>
 #include <QHBoxLayout>
