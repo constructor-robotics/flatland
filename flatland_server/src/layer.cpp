@@ -224,6 +224,10 @@ void Layer::LoadFromBitmap(const cv::Mat &bitmap, double occupied_thresh,
   uint32_t edges_added = 0;
 
   auto add_poly = [&](std::vector<cv::Point2f>& poly) {
+    if (poly.size() < 3) {
+      // skip degenerate polygons
+      return;
+    }
     b2ChainShape polygon_chain;
     double rows = bitmap.rows;
     double res = resolution;
