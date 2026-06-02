@@ -126,6 +126,7 @@ void DebugVisualization::BodyToMarkers(visualization_msgs::MarkerArray& markers,
   while (fixture != NULL) {  // traverse fixture linked list
     visualization_msgs::Marker marker;
     marker.header.frame_id = "map";
+    marker.frame_locked = true;
     marker.id = markers.markers.size();
     marker.color.r = r;
     marker.color.g = g;
