@@ -81,9 +81,9 @@ void DiffDrive::OnInitialize(const YAML::Node& config) {
 
   // noise are in the form of linear x, linear y, angular variances
   std::vector<double> odom_twist_noise =
-      reader.GetList<double>("odom_twist_noise", {0, 0, 0}, 3, 3);
+      reader.GetList<double>("odom_twist_noise", {1e-5, 1e-5, 1e-5}, 3, 3);
   std::vector<double> odom_pose_noise =
-      reader.GetList<double>("odom_pose_noise", {0, 0, 0}, 3, 3);
+      reader.GetList<double>("odom_pose_noise", {1e-5, 1e-5, 1e-5}, 3, 3);
 
   double pub_rate =
       reader.Get<double>("pub_rate", std::numeric_limits<double>::infinity());
