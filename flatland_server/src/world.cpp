@@ -198,7 +198,7 @@ void World::LoadLayers(YamlReader &layers_reader) {
       }
     }
 
-    if (map_path.string().front() != '/' && map_path.string().length() > 0) {
+    if (map_path.string().length() > 0 && map_path.string().front() != '/') {
       map_path = world_yaml_dir_ / map_path;
     }
 
